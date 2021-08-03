@@ -7,6 +7,14 @@ csvfile = open(f'{timestamp}_coords.csv','w')
 writer = csv.writer(csvfile)
 
 ahk = AHK()
+def record_position(ahk):
+    coordname = input('Type coord name: ')
+    coord = ahk.mouse_position
+    
+    print(f'Recorded coord {coordname}, pos {coord}')
+    return coord
+
+
 # Constant loop.
 while True:
 
@@ -16,3 +24,4 @@ while True:
     time.sleep(.3)
     print(f'Recorded coord {coordname}, pos {coord}')
     writer.writerow([coordname,coord])
+

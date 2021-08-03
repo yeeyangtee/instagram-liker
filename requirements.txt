@@ -1,0 +1,6 @@
+ahk
+numpy
+pandas
+pillow
+scikit-learn
+scikit-image
