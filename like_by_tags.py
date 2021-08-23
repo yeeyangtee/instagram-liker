@@ -11,8 +11,13 @@ This script is tested on chrome dev mode, with Ipad mode resolution 768 x 1024. 
 This one iterates thru taglist and likes the first NUM_LIKES posts.
 '''
 
-TAGSLIST = ['sgchiropractic','backpain','sgfitness','chronicpain','neckpain','rehabscience','empowerment','sghealth','physiotherapy','sghealthyliving','chiropractor']
-NUM_LIKES = 30
+with open('hashtags.txt', 'r') as txtfile:
+	lines = txtfile.read().splitlines()
+
+NUM_LIKES = int(lines[0])
+TAGLIST = lines[1:]
+print('Number of likes:',NUM_LIKES)
+print('List of tags selected:', TAGLIST) 
 
 def record_position(ahk, message = 'Please enter coord name:'):
     coordname = input(message)
@@ -27,9 +32,13 @@ def click(name, delay = 5):
 	ahk.click(coords2[name][0], coords2[name][1])
 	time.sleep(random.random()* delay)
 
+
 ahk = AHK()
+
 # getting main top left...
 resetter = record_position(ahk, 'Please navigate to top left of main screen and press Enter')
+win = ahk.find_window(title=b'Instagram')
+win.activate()
 coords = {}
 with open('coords/ipad_coords_75.csv', 'r', newline='', encoding='utf-8') as file:
 	reader = csv.reader(file)
@@ -46,8 +55,9 @@ like_template = Image.open('img/heart_75.png').convert('L')
 template = np.array(like_template)
 
 # do one explore post
-for tag in TAGSLIST:
+for tag in TAGLIST:
 	click('searchbar')
+	time.sleep(0.5)
 	click('searchbar')
 	time.sleep(0.5)
 	ahk.type(f'#{tag}')
@@ -59,20 +69,19 @@ for tag in TAGSLIST:
 
 	bbox = (coords2['explore_top_left'][0],coords2['explore_top_left'][1], coords2['explore_bot_right'][0], coords2['explore_bot_right'][1])
 
-
-
 	for i in range(NUM_LIKES):
+		# vision part to detect heart
 		im = ImageGrab.grab(bbox).convert('L')
 		im.save('tmp.png')
 		result = match_template(np.array(im), template, pad_input=True)
 		ij = np.unravel_index(np.argmax(result), result.shape)
 		keypoint = ij[:2]
 
+		# Get clickpoint (heart), click, wait, click next post, wait.
 		clickpt = (coords2['explore_top_left'][0]+keypoint[1], coords2['explore_top_left'][1]+keypoint[0])
+		time.sleep(0.2+5*random.random())
 		ahk.click(clickpt)
-
+		time.sleep(0.2+5*random.random())
 		ahk.click(coords2['next_post'])
-		time.sleep(5*random.random())
-		ahk.click(clickpt)
-		time.sleep(5*random.random())
+		time.sleep(0.5+5*random.random()) # abit longer for loading next post.
 	
